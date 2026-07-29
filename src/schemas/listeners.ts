@@ -50,12 +50,49 @@ export const ipPortSchema = z
     }
   });
 
-export const listenerSchema = z.strictObject({
-  listenerAddr: ipPortSchema,
-  redirectAddr: ipPortSchema,
-  agentId: z.coerce
-    .number({ message: "invalid agent id" })
-    .int({ message: "invalid agent id" }),
-});
+export const listenerSchema = z
+  .strictObject({
+    listenerAddr: ipPortSchema,
+    redirectAddr: ipPortSchema,
+    agentId: z.coerce
+      .number({ message: "invalid agent id" })
+      .int({ message: "invalid agent id" }),
+    shadowPort: z.boolean(),
+    shadowInternalPort: z.coerce.number().int().min(1).max(65535),
+    shadowSource: z.string(),
+  })
+  .superRefine((value, ctx) => {
+    if (!value.shadowPort) return;
+    const sources = value.shadowSource
+      .split(",")
+      .map((source) => source.trim())
+      .filter(Boolean);
+    if (sources.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At least one source IPv4 address or CIDR is required.",
+        path: ["shadowSource"],
+      });
+    }
+    if (sources.length > 64) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "At most 64 source entries are allowed.",
+        path: ["shadowSource"],
+      });
+    }
+    for (const source of sources) {
+      const result = source.includes("/")
+        ? z.string().cidr({ version: "v4" }).safeParse(source)
+        : z.string().ip({ version: "v4" }).safeParse(source);
+      if (!result.success) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Invalid IPv4 address or CIDR: ${source}`,
+          path: ["shadowSource"],
+        });
+      }
+    }
+  });
 
 export type Listener = z.infer<typeof listenerSchema>;

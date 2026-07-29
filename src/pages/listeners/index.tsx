@@ -54,6 +54,7 @@ export default function IndexPage() {
             <TableColumn>#</TableColumn>
             <TableColumn className="uppercase">Agent</TableColumn>
             <TableColumn className="uppercase">Network</TableColumn>
+            <TableColumn className="uppercase">Mode</TableColumn>
             <TableColumn className="uppercase">Listener Address</TableColumn>
             <TableColumn className="uppercase">Redirect Address</TableColumn>
             <TableColumn className={"uppercase"}>Actions</TableColumn>
@@ -79,6 +80,11 @@ export default function IndexPage() {
                         </div>
                       </TableCell>
                       <TableCell>{listener.Network}</TableCell>
+                      <TableCell>
+                        {listener.ShadowPort
+                          ? `ShadowPort → ${listener.ShadowPort.InternalPort} [${listener.ShadowPort.AllowedSources.join(", ")}]`
+                          : "Standard"}
+                      </TableCell>
                       <TableCell>{listener.ListenerAddr}</TableCell>
                       <TableCell>{listener.RedirectAddr}</TableCell>
                       <TableCell>

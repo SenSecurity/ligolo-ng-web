@@ -1,6 +1,7 @@
 export interface LigoloAgent {
   Name: string;
   Network: Network[];
+  Capabilities?: string[];
   Session: Session;
   SessionID: string;
   Interface: string;

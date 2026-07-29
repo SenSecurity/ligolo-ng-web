@@ -10,4 +10,8 @@ export interface Listener {
     ListenerAddr: string
     RedirectAddr: string
     Online: boolean
+    ShadowPort?: {
+        InternalPort: number
+        AllowedSources: string[]
+    }
 }
