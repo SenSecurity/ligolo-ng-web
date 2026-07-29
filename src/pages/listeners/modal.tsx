@@ -66,24 +66,27 @@ export function ListenerCreationModal({
 
       setFormErrors({});
 
-      await post("api/v1/listeners", {
-        listenerAddr,
-        redirectAddr,
-        agentId: selectedAgent,
-        network: listenerProtocol,
-        shadowPort: shadowPort
-          ? {
-              internalPort: Number(shadowInternalPort),
-              allowedSources: shadowSource
-                .split(",")
-                .map((source) => source.trim())
-                .filter(Boolean),
-            }
-          : undefined,
-      }).catch(setError);
-
-      if (mutate) mutate();
-      if (callback) callback();
+      try {
+        await post("api/v1/listeners", {
+          listenerAddr,
+          redirectAddr,
+          agentId: selectedAgent,
+          network: listenerProtocol,
+          shadowPort: shadowPort
+            ? {
+                internalPort: Number(shadowInternalPort),
+                allowedSources: shadowSource
+                  .split(",")
+                  .map((source) => source.trim())
+                  .filter(Boolean),
+              }
+            : undefined,
+        });
+        if (mutate) await mutate();
+        if (callback) callback();
+      } catch (error) {
+        setError(error);
+      }
     },
     [
       mutate,
